@@ -53,10 +53,13 @@ def rotate_flat(locs, tee, flag):
 
   return res2
 
-def gather_shots(hole_number, round_numbers=[], shot_number=1):
-  data_path = "%s/data/%s/" % (os.getcwd(), str(hole_number))
+def gather_shots(hole_number, round_numbers=[], shot_number=1, year=2018):
+  data_path = "%s/data/%s/%s/" % (os.getcwd(), str(year), str(hole_number))
   for round_number in round_numbers:
-    filename = "%s_%s.json" % (str(round_number), str(hole_number))
+    if year == 2018:
+      filename = "%s_%s.json" % (str(round_number), str(hole_number))
+    elif year == 2017:
+      filename = "%s_%s.json" % (str(hole_number), str(round_number))
     filepath = data_path + filename
     with open(filepath) as f:
       data = json.load(f)
@@ -75,10 +78,11 @@ def gather_shots(hole_number, round_numbers=[], shot_number=1):
     hps = data['Rs'][0]['Hs'][0]['HPs']
     sks = []
     for hp in hps:
-      sk = hp['Sks'][shot_number - 1]
-      skx = sk['X']
-      sky = sk['Y']
-      sks.append([skx, sky])
+      if len(hp['Sks']) >= shot_number:
+        sk = hp['Sks'][shot_number - 1]
+        skx = sk['X']
+        sky = sk['Y']
+        sks.append([skx, sky])
 
   return rotate_flat(sks, tee, flag)
 
@@ -247,7 +251,6 @@ if __name__ == '__main__':
   locs = gather_shots(hole_number, round_numbers=round_numbers, shot_number=shot_number)
   k_means_process(locs, num_clusterss, num_graph_cols=num_graph_cols)
 
-
   hole_number = 10
   shot_number = 2
   round_numbers = [1]
@@ -256,13 +259,13 @@ if __name__ == '__main__':
   locs = gather_shots(hole_number, round_numbers=round_numbers, shot_number=shot_number)
   k_means_process(locs, num_clusterss, num_graph_cols=num_graph_cols)
 
-
-  hole_number = 10
+  year = 2017
+  hole_number = 12
   shot_number = 1
-  round_numbers = [1]
+  round_numbers = [2]
   epss = [5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25]
   num_graph_cols = 3
-  locs = gather_shots(hole_number, round_numbers=round_numbers, shot_number=shot_number)
+  locs = gather_shots(hole_number, round_numbers=round_numbers, shot_number=shot_number, year=year)
   db_scan_process(locs, epss, num_graph_cols=num_graph_cols)
 
   hole_number = 10
@@ -273,7 +276,6 @@ if __name__ == '__main__':
   locs = gather_shots(hole_number, round_numbers=round_numbers, shot_number=shot_number)
   db_scan_process(locs, epss, num_graph_cols=num_graph_cols)
 
-
   hole_number = 10
   shot_number = 1
   round_numbers = [1]
@@ -281,7 +283,6 @@ if __name__ == '__main__':
   num_graph_cols = 2
   locs = gather_shots(hole_number, round_numbers=round_numbers, shot_number=shot_number)
   agglomerative_clustering_process(locs, num_clusterss)
-
 
   hole_number = 10
   shot_number = 2
